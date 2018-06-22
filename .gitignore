@@ -2,4 +2,4 @@
 
 target
 *.iml
-resources/database
+src/main/resources/database
