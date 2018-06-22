@@ -1,0 +1,15 @@
+{"type":"create_database", "database": "test"};
+
+{"type":"create_table", "database": "test", "table":"user", "metadata":["id", "name"]};
+
+{"type":"insert", "database": "test", "table":"user", "data":{"id":"1", "name":"name"}};
+
+{"type":"select", "database": "test", "table":"user"};
+
+{"type":"update", "database": "test", "table":"user", "data":{"id":"23"}}
+
+{"type":"delete", "database": "test", "table":"user"};
+
+{"type":"drop_table", "database": "test", "table":"user"};
+
+{"type":"drop_database", "database": "test"};
