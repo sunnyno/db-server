@@ -34,12 +34,12 @@ public class ResultWriter implements AutoCloseable {
 
     public void writeResult(int result) {
         try {
-            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
-            bufferedWriter.write(String.valueOf(result));
-            bufferedWriter.newLine();
-            bufferedWriter.write(ESCAPE_CHAR);
-            bufferedWriter.newLine();
-            bufferedWriter.flush();
+            outputStream.write(String.valueOf(result).getBytes());
+            outputStream.write(newLine.getBytes());
+            outputStream.write(ESCAPE_CHAR.getBytes());
+            outputStream.write(newLine.getBytes());
+            outputStream.flush();
+
         } catch (IOException e) {
             throw new QueryExecuteException("Unable to fetch result", e);
         }
@@ -48,12 +48,12 @@ public class ResultWriter implements AutoCloseable {
 
     public void writeResult(boolean result) {
         try {
-            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
-            bufferedWriter.write(String.valueOf(result ? SUCCESS_RESULT : FAILURE_RESULT));
-            bufferedWriter.newLine();
-            bufferedWriter.write(ESCAPE_CHAR);
-            bufferedWriter.newLine();
-            bufferedWriter.flush();
+            outputStream.write(String.valueOf(result ? SUCCESS_RESULT : FAILURE_RESULT).getBytes());
+            outputStream.write(newLine.getBytes());
+            outputStream.write(ESCAPE_CHAR.getBytes());
+            outputStream.write(newLine.getBytes());
+            outputStream.flush();
+
         } catch (IOException e) {
             throw new QueryExecuteException("Unable to fetch result", e);
         }
@@ -62,12 +62,11 @@ public class ResultWriter implements AutoCloseable {
 
     public void writeResult(String message) {
         try {
-            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
-            bufferedWriter.write(message);
-            bufferedWriter.newLine();
-            bufferedWriter.write(ESCAPE_CHAR);
-            bufferedWriter.newLine();
-            bufferedWriter.flush();
+            outputStream.write(message.getBytes());
+            outputStream.write(newLine.getBytes());
+            outputStream.write(ESCAPE_CHAR.getBytes());
+            outputStream.write(newLine.getBytes());
+            outputStream.flush();
         } catch (IOException e) {
             throw new QueryExecuteException("Unable to fetch result", e);
         }
