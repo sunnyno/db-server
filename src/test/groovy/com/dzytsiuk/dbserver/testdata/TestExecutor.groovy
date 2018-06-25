@@ -9,9 +9,9 @@ class TestExecutor {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(it.getBytes())
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()
             def socket = [getInputStream: inputStream, getOutputStream: outputStream,
-                          close: {inputStream.close(); outputStream.close()}] as Socket
+                          close         : { inputStream.close(); outputStream.close() }] as Socket
             DBService dbService = new DBService(socket)
-            dbService.executeQuery()
+            dbService.executeQuery(socket.getInputStream(), socket.getOutputStream())
             inputStream.close()
             outputStream.close()
         }

@@ -10,26 +10,21 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import static com.dzytsiuk.dbserver.server.Server.*;
+
 public class QueryExecutor {
 
-    private static final String DB_STORAGE = "src/main/resources/database/";
-    private static final String METADATA_XML_SUFFIX = "-metadata.xml";
-    private static final String DATA_XML_SUFFIX = "-data.xml";
-
-    private Query query;
+    // private Query query;
     private static final StaxQueryHandler STAX_QUERY_HANDLER = new StaxQueryHandler();
 
-    public QueryExecutor(Query query) {
-        this.query = query;
-    }
 
-    public File select() {
+    public File select(Query query) {
         String dataBase = query.getDataBase();
         String table = query.getTable();
         return new File(DB_STORAGE + dataBase + File.separator + table + DATA_XML_SUFFIX);
     }
 
-    public int insert() {
+    public int insert(Query query) {
         try {
             File table = new File(DB_STORAGE + query.getDataBase(), query.getTable() + DATA_XML_SUFFIX);
 
@@ -46,7 +41,7 @@ public class QueryExecutor {
         }
     }
 
-    public int update() {
+    public int update(Query query) {
         try {
             File table = new File(DB_STORAGE + query.getDataBase() + File.separator
                     + query.getTable() + DATA_XML_SUFFIX);
@@ -57,7 +52,7 @@ public class QueryExecutor {
 
     }
 
-    public int delete() {
+    public int delete(Query query) {
         try {
             File table = new File(DB_STORAGE + query.getDataBase(), query.getTable() + DATA_XML_SUFFIX);
             int count = STAX_QUERY_HANDLER.getCount(table, query.getTable());
@@ -70,12 +65,12 @@ public class QueryExecutor {
 
     }
 
-    public boolean createDatabase() {
+    public boolean createDatabase(Query query) {
         File file = new File(DB_STORAGE, query.getDataBase());
         return file.mkdir();
     }
 
-    public boolean createTable() {
+    public boolean createTable(Query query) {
         try {
             File metadata = new File(DB_STORAGE + query.getDataBase(), query.getTable() + METADATA_XML_SUFFIX);
             File data = new File(DB_STORAGE + query.getDataBase(), query.getTable() + DATA_XML_SUFFIX);
@@ -87,13 +82,13 @@ public class QueryExecutor {
         }
     }
 
-    public boolean dropDatabase() {
+    public boolean dropDatabase(Query query) {
         File file = new File(DB_STORAGE + query.getDataBase());
         return file.delete();
 
     }
 
-    public boolean dropTable() {
+    public boolean dropTable(Query query) {
         File data = new File(DB_STORAGE + query.getDataBase(), query.getTable() + DATA_XML_SUFFIX);
         File metadata = new File(DB_STORAGE + query.getDataBase(), query.getTable() + METADATA_XML_SUFFIX);
         return data.delete() && metadata.delete();

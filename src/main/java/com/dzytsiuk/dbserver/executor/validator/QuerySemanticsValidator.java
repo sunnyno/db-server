@@ -17,10 +17,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.dzytsiuk.dbserver.server.Server.*;
+
+
 public class QuerySemanticsValidator {
-    private static final String DB_STORAGE = "src/main/resources/database/";
-    private static final String METADATA_XML_SUFFIX = "-metadata.xml";
-    private static final String DATA_XML_SUFFIX = "-data.xml";
     private static final SAXParserFactory SAX_PARSER_FACTORY = SAXParserFactory.newInstance();
 
 
@@ -47,7 +47,7 @@ public class QuerySemanticsValidator {
         if (checkDatabase != null) return checkDatabase;
 
 
-        String checkTable = checkTableExistance(query);
+        String checkTable = checkTableExistence(query);
         if (checkTable != null) return checkTable;
 
         return null;
@@ -59,7 +59,7 @@ public class QuerySemanticsValidator {
 
 
     public String validateCreateDatabase(Query query) {
-        String checkDatabase = checkDatabaseExistance(query);
+        String checkDatabase = checkDatabaseExistence(query);
         if (checkDatabase != null) return checkDatabase;
 
         return null;
@@ -85,7 +85,8 @@ public class QuerySemanticsValidator {
     }
 
     private String checkDML(Query query) {
-        checkDBAndTable(query);
+        String checkDBAndTable = checkDBAndTable(query);
+        if (checkDBAndTable != null) return checkDBAndTable;
 
         String checkMetadata = checkMetadata(query);
         if (checkMetadata != null) return checkMetadata;
@@ -103,7 +104,7 @@ public class QuerySemanticsValidator {
         return null;
     }
 
-    private String checkTableExistance(Query query) {
+    private String checkTableExistence(Query query) {
         if (query.getTable() == null) {
             return "No table specified";
         }
@@ -125,7 +126,7 @@ public class QuerySemanticsValidator {
         return null;
     }
 
-    private String checkDatabaseExistance(Query query) {
+    private String checkDatabaseExistence(Query query) {
         if (query.getDataBase() == null) {
             return "No database specified";
         }

@@ -68,7 +68,7 @@ class QueryParserTest {
     @Test
     void parseCreateDatabaseTest() {
         Query expectedQuery = new Query(type: QueryType.CREATE_DATABASE, dataBase: 'test')
-        def jsonQuery =" {\"type\" : \"create_database\", \"database\" :\"test\"}"
+        def jsonQuery = " {\"type\" : \"create_database\", \"database\" :\"test\"}"
 
         QueryParser queryParser = new QueryParser(new BufferedInputStream(new ByteArrayInputStream(jsonQuery.getBytes())))
         def actualQuery = queryParser.parseQuery()
@@ -80,7 +80,7 @@ class QueryParserTest {
     @Test
     void parseDropDataBaseTest() {
         Query expectedQuery = new Query(type: QueryType.DROP_DATABASE, dataBase: 'test')
-        def jsonQuery =" {\"type\" : \"drop_database\", \"database\" :\"test\"}"
+        def jsonQuery = " {\"type\" : \"drop_database\", \"database\" :\"test\"}"
 
         QueryParser queryParser = new QueryParser(new BufferedInputStream(new ByteArrayInputStream(jsonQuery.getBytes())))
         def actualQuery = queryParser.parseQuery()

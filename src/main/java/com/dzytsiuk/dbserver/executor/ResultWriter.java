@@ -9,7 +9,7 @@ public class ResultWriter implements AutoCloseable {
 
     private static final int SUCCESS_RESULT = 1;
     private static final int FAILURE_RESULT = 0;
-    private static final String ESCAPE_CHAR = "\n\\";
+    private static final String ESCAPE_CHAR = "\\";
     private static final String newLine = System.getProperty("line.separator");
     private OutputStream outputStream;
 
@@ -74,7 +74,8 @@ public class ResultWriter implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws IOException {
+
         outputStream.flush();
     }
 }

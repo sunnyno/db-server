@@ -51,7 +51,7 @@ public class QueryParser {
     }
 
     private void setMetadataToQuery(Query query, JSONArray jsonArray) {
-        if(query.getMetadata() == null){
+        if (query.getMetadata() == null) {
             query.setMetadata(new ArrayList<>());
         }
         for (Object o : jsonArray) {
@@ -61,7 +61,7 @@ public class QueryParser {
     }
 
     private void setMapToQuery(Query query, JSONObject data) {
-        if(query.getMetadata() == null){
+        if (query.getMetadata() == null) {
             query.setMetadata(new ArrayList<>());
         }
         if (query.getData() == null) {
@@ -80,7 +80,7 @@ public class QueryParser {
 
         String line;
 
-        try  {
+        try {
             InputStreamReader in = new InputStreamReader(bufferedInputStream);
             BufferedReader bufferedReader = new BufferedReader(in);
 

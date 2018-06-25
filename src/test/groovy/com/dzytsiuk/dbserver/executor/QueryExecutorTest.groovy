@@ -2,6 +2,7 @@ package com.dzytsiuk.dbserver.executor
 
 import com.dzytsiuk.dbserver.entity.Query
 import com.dzytsiuk.dbserver.entity.QueryType
+import com.dzytsiuk.dbserver.server.Server
 import org.junit.Test
 
 import static org.junit.Assert.*
@@ -11,13 +12,13 @@ class QueryExecutorTest {
     @Test
     void insertTest() {
         Query query = new Query(type: QueryType.INSERT, dataBase: 'test', table: 'user1', data: ['id': '1', 'name': 'test'])
-        File dir = new File("src/main/resources/database/" + query.dataBase)
+        File dir = new File(Server.DB_STORAGE + query.dataBase)
         dir.mkdir()
-        File file = new File("src/main/resources/database/" + query.dataBase, query.table + "-data.xml")
-        int beforeSize = file.size()
-        QueryExecutor queryExecutor = new QueryExecutor(query)
-        queryExecutor.insert()
-        int afterSize = file.size()
+        File file = new File(Server.DB_STORAGE + query.dataBase, query.table + Server.DATA_XML_SUFFIX)
+        def beforeSize = file.size()
+        QueryExecutor queryExecutor = new QueryExecutor()
+        queryExecutor.insert(query)
+        def afterSize = file.size()
         assertNotNull(file)
         assertTrue(afterSize > beforeSize)
         file.delete()
@@ -29,16 +30,14 @@ class QueryExecutorTest {
     void updateTest() {
         Query insertQuery = new Query(type: QueryType.INSERT, dataBase: 'test', table: 'user1', data: ['id': '1', 'name': 'test'])
         Query updateQuery = new Query(type: QueryType.UPDATE, dataBase: 'test', table: 'user1', data: ['id': '2'])
-        File dir = new File("src/main/resources/database/" + insertQuery.dataBase)
+        File dir = new File(Server.DB_STORAGE + insertQuery.dataBase)
         dir.mkdir()
-        File file = new File("src/main/resources/database/" + insertQuery.dataBase, insertQuery.table + "-data.xml")
+        File file = new File(Server.DB_STORAGE + insertQuery.dataBase, insertQuery.table + Server.DATA_XML_SUFFIX)
         file.createNewFile()
-        QueryExecutor queryExecutor = new QueryExecutor(insertQuery)
-        queryExecutor.insert()
-
-        QueryExecutor update = new QueryExecutor(updateQuery)
-        int affectedRows = update.update()
-        File fileAfter = new File("src/main/resources/database/" + insertQuery.dataBase, insertQuery.table + "-data.xml")
+        QueryExecutor queryExecutor = new QueryExecutor()
+        queryExecutor.insert(insertQuery)
+        int affectedRows = queryExecutor.update(updateQuery)
+        File fileAfter = new File(Server.DB_STORAGE + insertQuery.dataBase, insertQuery.table + Server.DATA_XML_SUFFIX)
         assertNotEquals(file.getBytes(), fileAfter.getBytes())
         assertEquals(1, affectedRows)
         file.delete()
@@ -50,14 +49,13 @@ class QueryExecutorTest {
     void deleteTest() {
         Query insertQuery = new Query(type: QueryType.INSERT, dataBase: 'test', table: 'user1', data: ['id': '1', 'name': 'test'])
         Query deleteQuery = new Query(type: QueryType.DELETE, dataBase: 'test', table: 'user1')
-        File dir = new File("src/main/resources/database/" + insertQuery.dataBase)
+        File dir = new File(Server.DB_STORAGE + insertQuery.dataBase)
         dir.mkdir()
-        File file = new File("src/main/resources/database/" + insertQuery.dataBase + '/' + insertQuery.table + "-data.xml")
-        QueryExecutor queryExecutor = new QueryExecutor(insertQuery)
-        queryExecutor.insert()
-
-        QueryExecutor delete = new QueryExecutor(deleteQuery)
-        int affectedRows = delete.delete()
+        File file = new File(Server.DB_STORAGE + insertQuery.dataBase + File.separator
+                + insertQuery.table + Server.DATA_XML_SUFFIX)
+        QueryExecutor queryExecutor = new QueryExecutor()
+        queryExecutor.insert(insertQuery)
+        int affectedRows = queryExecutor.delete(deleteQuery)
 
         assertEquals(0, file.getBytes().size())
         assertEquals(1, affectedRows)
@@ -69,11 +67,11 @@ class QueryExecutorTest {
     @Test
     void selectTest() {
         Query query = new Query(type: QueryType.SELECT, dataBase: 'test', table: 'user1')
-        File dir = new File("src/main/resources/database/" + query.dataBase)
+        File dir = new File(Server.DB_STORAGE + query.dataBase)
         dir.mkdir()
-        File file = new File("src/test/resources/db/" + query.dataBase, query.table + "-data.xml")
-        QueryExecutor queryExecutor = new QueryExecutor(query)
-        def select = queryExecutor.select()
+        File file = new File(Server.DB_STORAGE + query.dataBase, query.table + Server.DATA_XML_SUFFIX)
+        QueryExecutor queryExecutor = new QueryExecutor()
+        def select = queryExecutor.select(query)
         assertEquals(file.name, select.name)
         file.delete()
         dir.delete()
@@ -82,13 +80,13 @@ class QueryExecutorTest {
     @Test
     void createTable() {
         Query query = new Query(type: QueryType.CREATE_TABLE, dataBase: 'test', table: 'user1', metadata: ['id', 'name'])
-        File dir = new File("src/main/resources/database/" + query.dataBase)
+        File dir = new File(Server.DB_STORAGE + query.dataBase)
         dir.mkdir()
 
-        File data = new File("src/main/resources/database/" + query.dataBase, query.table + "-data.xml")
-        File metadata = new File("src/main/resources/database/" + query.dataBase, query.table + "-metadata.xml")
-        QueryExecutor queryExecutor = new QueryExecutor(query)
-        queryExecutor.createTable()
+        File data = new File(Server.DB_STORAGE + query.dataBase, query.table + Server.DATA_XML_SUFFIX)
+        File metadata = new File(Server.DB_STORAGE + query.dataBase, query.table + Server.METADATA_XML_SUFFIX)
+        QueryExecutor queryExecutor = new QueryExecutor()
+        queryExecutor.createTable(query)
 
         assertNotNull(data)
         assertNotNull(metadata)
@@ -101,9 +99,9 @@ class QueryExecutorTest {
     void createDatabase() {
         Query query = new Query(type: QueryType.CREATE_DATABASE, dataBase: 'test')
 
-        File database = new File("src/main/resources/database/" + query.dataBase)
-        QueryExecutor queryExecutor = new QueryExecutor(query)
-        queryExecutor.createDatabase()
+        File database = new File(Server.DB_STORAGE + query.dataBase)
+        QueryExecutor queryExecutor = new QueryExecutor()
+        queryExecutor.createDatabase(query)
 
         assertNotNull(database)
         database.delete()
@@ -113,15 +111,15 @@ class QueryExecutorTest {
     @Test
     void dropTable() {
         Query query = new Query(type: QueryType.DROP_TABLE, dataBase: 'test', table: 'user1')
-        File dir = new File("src/main/resources/database/" + query.dataBase)
+        File dir = new File(Server.DB_STORAGE + query.dataBase)
         dir.mkdir()
 
-        File data = new File("src/main/resources/database/" + query.dataBase, query.table + "-data.xml")
+        File data = new File(Server.DB_STORAGE + query.dataBase, query.table + Server.DATA_XML_SUFFIX)
         data.createNewFile()
-        File metadata = new File("src/main/resources/database/" + query.dataBase, query.table + "-metadata.xml")
+        File metadata = new File(Server.DB_STORAGE + query.dataBase, query.table + Server.METADATA_XML_SUFFIX)
         metadata.createNewFile()
-        QueryExecutor queryExecutor = new QueryExecutor(query)
-        queryExecutor.dropTable()
+        QueryExecutor queryExecutor = new QueryExecutor()
+        queryExecutor.dropTable(query)
 
         assertFalse(data.exists())
         assertFalse(metadata.exists())
@@ -133,10 +131,10 @@ class QueryExecutorTest {
     void dropDatabase() {
         Query query = new Query(type: QueryType.DROP_DATABASE, dataBase: 'test')
 
-        File database = new File("src/main/resources/database/" + query.dataBase)
+        File database = new File(Server.DB_STORAGE + query.dataBase)
         database.mkdir()
-        QueryExecutor queryExecutor = new QueryExecutor(query)
-        queryExecutor.dropDatabase()
+        QueryExecutor queryExecutor = new QueryExecutor()
+        queryExecutor.dropDatabase(query)
 
         assertTrue(!database.exists())
 

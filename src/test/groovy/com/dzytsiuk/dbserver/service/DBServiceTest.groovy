@@ -21,7 +21,7 @@ class DBServiceTest {
                       close         : { inputStream.close(); outputStream.close() }] as Socket
 
         DBService dbService = new DBService(socket)
-        dbService.executeQuery()
+        dbService.executeQuery(socket.getInputStream(), socket.getOutputStream())
         String actualOutput = new String(outputStream.toByteArray())
         assertEquals(expectedOutput.trim(), actualOutput.replace(ESCAPE_CHAR, "").trim())
 
@@ -45,7 +45,7 @@ class DBServiceTest {
                       close         : { inputStream.close(); outputStream.close() }] as Socket
 
         DBService dbService = new DBService(socket)
-        dbService.executeQuery()
+        dbService.executeQuery(socket.getInputStream(), socket.getOutputStream())
         String actualOutput = new String(outputStream.toByteArray())
         assertEquals(expectedOutput.trim(), actualOutput.replace(ESCAPE_CHAR, "").trim())
 
@@ -70,7 +70,7 @@ class DBServiceTest {
                       close         : { inputStream.close(); outputStream.close() }] as Socket
 
         DBService dbService = new DBService(socket)
-        dbService.executeQuery()
+        dbService.executeQuery(socket.getInputStream(), socket.getOutputStream())
         String actualOutput = new String(outputStream.toByteArray())
         assertEquals(expectedOutput.trim(), actualOutput.replace(ESCAPE_CHAR, "").trim())
 
@@ -89,14 +89,14 @@ class DBServiceTest {
 
         def input = "{\"type\" : \"select\", \"database\" :\"test\", \"table\":\"user\"}"
 
-        def expectedOutput = "<test><user><name>John</name><id>1</id></user></test>"
+        def expectedOutput = "<?xml version=\"1.0\" ?><test><user><name>John</name><id>1</id></user></test>"
         ByteArrayInputStream inputStream = new ByteArrayInputStream(input.getBytes())
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream()
         def socket = [getInputStream: inputStream, getOutputStream: outputStream,
                       close         : { inputStream.close(); outputStream.close() }] as Socket
 
         DBService dbService = new DBService(socket)
-        dbService.executeQuery()
+        dbService.executeQuery(socket.getInputStream(), socket.getOutputStream())
         String actualOutput = new String(outputStream.toByteArray())
 
         assertEquals(expectedOutput.trim(), actualOutput.replace(ESCAPE_CHAR, "").trim())
@@ -123,7 +123,7 @@ class DBServiceTest {
                       close         : { inputStream.close(); outputStream.close() }] as Socket
 
         DBService dbService = new DBService(socket)
-        dbService.executeQuery()
+        dbService.executeQuery(socket.getInputStream(), socket.getOutputStream())
         String actualOutput = new String(outputStream.toByteArray())
         assertEquals(expectedOutput.trim(), actualOutput.replace(ESCAPE_CHAR, "").trim())
 
@@ -140,10 +140,10 @@ class DBServiceTest {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(input.getBytes())
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream()
         def socket = [getInputStream: inputStream, getOutputStream: outputStream,
-                      close: {inputStream.close(); outputStream.close()}] as Socket
+                      close         : { inputStream.close(); outputStream.close() }] as Socket
 
         DBService dbService = new DBService(socket)
-        dbService.executeQuery()
+        dbService.executeQuery(socket.getInputStream(), socket.getOutputStream())
         String actualOutput = new String(outputStream.toByteArray())
         assertEquals(expectedOutput.trim(), actualOutput.replace(ESCAPE_CHAR, "").trim())
     }

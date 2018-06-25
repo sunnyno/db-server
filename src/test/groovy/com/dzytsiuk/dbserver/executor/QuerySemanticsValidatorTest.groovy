@@ -50,12 +50,12 @@ class QuerySemanticsValidatorTest {
     @Test
     void validateUpdateTest() {
 
-        Query query = new Query(type: QueryType.UPDATE, dataBase: 'test', table: 'user1',  data: ['id': '1'], metadata: ['id'])
+        Query query = new Query(type: QueryType.UPDATE, dataBase: 'test', table: 'user1', data: ['id': '1'], metadata: ['id'])
         QuerySemanticsValidator queryValidator = new QuerySemanticsValidator()
         def actualResult = queryValidator.validateUpdate(query)
         def expected = 'Database test does not exist'
 
-        assertEquals(expected,actualResult)
+        assertEquals(expected, actualResult)
 
 
     }
@@ -70,7 +70,7 @@ class QuerySemanticsValidatorTest {
         def actualResult = queryValidator.validateDelete(query)
         def expected = 'Table user does not exist'
 
-        assertEquals(expected,actualResult)
+        assertEquals(expected, actualResult)
 
         QUERY_EXECUTOR.setUpOrTearDown("{\"type\" : \"drop_database\", \"database\" :\"test\"}")
     }
