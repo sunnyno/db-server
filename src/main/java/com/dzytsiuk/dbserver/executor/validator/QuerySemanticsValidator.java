@@ -1,7 +1,6 @@
 package com.dzytsiuk.dbserver.executor.validator;
 
 import com.dzytsiuk.dbserver.entity.Query;
-import com.dzytsiuk.dbserver.exception.QueryExecuteException;
 import com.dzytsiuk.dbserver.executor.validator.sax.SaxQueryHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -16,6 +15,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import static com.dzytsiuk.dbserver.server.Server.*;
 
@@ -25,36 +26,46 @@ public class QuerySemanticsValidator {
 
 
     public String validateInsert(Query query) {
-        return checkDML(query);
+        return Stream.of(checkDatabase(query), checkTable(query), checkMetadata(query))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
     }
 
     public String validateDelete(Query query) {
-        return checkDBAndTable(query);
+        return Stream.of(checkDatabase(query), checkTable(query))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
     }
 
     public String validateUpdate(Query query) {
-        return checkDML(query);
+        return Stream.of(checkDatabase(query), checkTable(query), checkMetadata(query))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
     }
 
     public String validateSelect(Query query) {
-
-        return checkDBAndTable(query);
+        return Stream.of(checkDatabase(query), checkTable(query))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
 
     }
 
     public String validateCreateTable(Query query) {
-        String checkDatabase = checkDatabase(query);
-        if (checkDatabase != null) return checkDatabase;
-
-
-        String checkTable = checkTableExistence(query);
-        if (checkTable != null) return checkTable;
-
-        return null;
+        return Stream.of(checkDatabase(query), checkTableExistence(query))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
     }
 
     public String validateDropTable(Query query) {
-        return checkDBAndTable(query);
+        return Stream.of(checkDatabase(query), checkTable(query))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
     }
 
 
@@ -72,26 +83,6 @@ public class QuerySemanticsValidator {
         return null;
     }
 
-
-    private String checkDBAndTable(Query query) {
-        String checkDatabase = checkDatabase(query);
-        if (checkDatabase != null) return checkDatabase;
-
-
-        String checkTable = checkTable(query);
-        if (checkTable != null) return checkTable;
-
-        return null;
-    }
-
-    private String checkDML(Query query) {
-        String checkDBAndTable = checkDBAndTable(query);
-        if (checkDBAndTable != null) return checkDBAndTable;
-
-        String checkMetadata = checkMetadata(query);
-        if (checkMetadata != null) return checkMetadata;
-        return null;
-    }
 
     private String checkTable(Query query) {
         if (query.getTable() == null) {
@@ -139,18 +130,17 @@ public class QuerySemanticsValidator {
 
 
     private String checkMetadata(Query query) {
-
         List<String> actualColumns = query.getMetadata();
         if (actualColumns == null) {
             return "Table " + query.getTable() + " columns are not specified";
         }
         try {
-            File matadataFile = new File(DB_STORAGE + query.getDataBase(), query.getTable() + METADATA_XML_SUFFIX);
+            File metadataFile = new File(DB_STORAGE + query.getDataBase(), query.getTable() + METADATA_XML_SUFFIX);
             List<String> columns = new ArrayList<>();
             SAXParser saxParser = SAX_PARSER_FACTORY.newSAXParser();
             DefaultHandler handler = new SaxQueryHandler(query.getTable(), columns);
 
-            saxParser.parse(matadataFile, handler);
+            saxParser.parse(metadataFile, handler);
 
             for (String next : actualColumns) {
                 if (!columns.remove(next)) {
@@ -158,7 +148,8 @@ public class QuerySemanticsValidator {
                 }
             }
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            throw new QueryExecuteException("Metadata validation failed", e);
+            return "Metadata validation failed " + e.getMessage();
+            //throw new QueryExecuteException("Metadata validation failed", e);
         }
         return null;
     }

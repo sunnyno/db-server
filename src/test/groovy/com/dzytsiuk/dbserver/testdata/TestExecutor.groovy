@@ -11,9 +11,8 @@ class TestExecutor {
             def socket = [getInputStream: inputStream, getOutputStream: outputStream,
                           close         : { inputStream.close(); outputStream.close() }] as Socket
             DBService dbService = new DBService(socket)
-            dbService.executeQuery(socket.getInputStream(), socket.getOutputStream())
-            inputStream.close()
-            outputStream.close()
+            dbService.executeQuery(new BufferedReader(new InputStreamReader(socket.getInputStream())), socket.getOutputStream())
+
         }
     }
 }

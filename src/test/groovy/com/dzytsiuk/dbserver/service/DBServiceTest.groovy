@@ -21,7 +21,7 @@ class DBServiceTest {
                       close         : { inputStream.close(); outputStream.close() }] as Socket
 
         DBService dbService = new DBService(socket)
-        dbService.executeQuery(socket.getInputStream(), socket.getOutputStream())
+        dbService.executeQuery(new BufferedReader(new InputStreamReader(socket.getInputStream())), socket.getOutputStream())
         String actualOutput = new String(outputStream.toByteArray())
         assertEquals(expectedOutput.trim(), actualOutput.replace(ESCAPE_CHAR, "").trim())
 
@@ -45,7 +45,7 @@ class DBServiceTest {
                       close         : { inputStream.close(); outputStream.close() }] as Socket
 
         DBService dbService = new DBService(socket)
-        dbService.executeQuery(socket.getInputStream(), socket.getOutputStream())
+        dbService.executeQuery(new BufferedReader(new InputStreamReader(socket.getInputStream())), socket.getOutputStream())
         String actualOutput = new String(outputStream.toByteArray())
         assertEquals(expectedOutput.trim(), actualOutput.replace(ESCAPE_CHAR, "").trim())
 
@@ -70,7 +70,7 @@ class DBServiceTest {
                       close         : { inputStream.close(); outputStream.close() }] as Socket
 
         DBService dbService = new DBService(socket)
-        dbService.executeQuery(socket.getInputStream(), socket.getOutputStream())
+        dbService.executeQuery(new BufferedReader(new InputStreamReader(socket.getInputStream())), socket.getOutputStream())
         String actualOutput = new String(outputStream.toByteArray())
         assertEquals(expectedOutput.trim(), actualOutput.replace(ESCAPE_CHAR, "").trim())
 
@@ -96,7 +96,7 @@ class DBServiceTest {
                       close         : { inputStream.close(); outputStream.close() }] as Socket
 
         DBService dbService = new DBService(socket)
-        dbService.executeQuery(socket.getInputStream(), socket.getOutputStream())
+        dbService.executeQuery(new BufferedReader(new InputStreamReader(socket.getInputStream())), socket.getOutputStream())
         String actualOutput = new String(outputStream.toByteArray())
 
         assertEquals(expectedOutput.trim(), actualOutput.replace(ESCAPE_CHAR, "").trim())
@@ -123,7 +123,7 @@ class DBServiceTest {
                       close         : { inputStream.close(); outputStream.close() }] as Socket
 
         DBService dbService = new DBService(socket)
-        dbService.executeQuery(socket.getInputStream(), socket.getOutputStream())
+        dbService.executeQuery(new BufferedReader(new InputStreamReader(socket.getInputStream())), socket.getOutputStream())
         String actualOutput = new String(outputStream.toByteArray())
         assertEquals(expectedOutput.trim(), actualOutput.replace(ESCAPE_CHAR, "").trim())
 
@@ -143,7 +143,7 @@ class DBServiceTest {
                       close         : { inputStream.close(); outputStream.close() }] as Socket
 
         DBService dbService = new DBService(socket)
-        dbService.executeQuery(socket.getInputStream(), socket.getOutputStream())
+        dbService.executeQuery(new BufferedReader(new InputStreamReader(socket.getInputStream())), socket.getOutputStream())
         String actualOutput = new String(outputStream.toByteArray())
         assertEquals(expectedOutput.trim(), actualOutput.replace(ESCAPE_CHAR, "").trim())
     }

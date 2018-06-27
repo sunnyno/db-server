@@ -13,7 +13,7 @@ class QueryParserTest {
         Query expectedQuery = new Query(type: QueryType.INSERT, dataBase: 'test', table: 'user1', data: ['id': '1', 'name': 'test'], metadata: ['id', 'name'])
         def jsonQuery = " {\"type\" : \"insert\", \"database\" :\"test\", \"table\":\"user1\", \"data\": {\"id\":\"1\", \"name\":\"test\"}}"
 
-        QueryParser queryParser = new QueryParser(new BufferedInputStream(new ByteArrayInputStream(jsonQuery.getBytes())))
+        QueryParser queryParser = new QueryParser(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(jsonQuery.getBytes()))))
         def actualQuery = queryParser.parseQuery()
 
         assertEquals(expectedQuery.type, actualQuery.type)
@@ -30,7 +30,7 @@ class QueryParserTest {
         Query expectedQuery = new Query(type: QueryType.SELECT, dataBase: 'test', table: 'user1')
         def jsonQuery = " {\"type\" : \"select\", \"database\" :\"test\", \"table\":\"user1\"}"
 
-        QueryParser queryParser = new QueryParser(new BufferedInputStream(new ByteArrayInputStream(jsonQuery.getBytes())))
+        QueryParser queryParser = new QueryParser(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(jsonQuery.getBytes()))))
         def actualQuery = queryParser.parseQuery()
 
         assertEquals(expectedQuery, actualQuery)
@@ -43,7 +43,7 @@ class QueryParserTest {
         Query expectedQuery = new Query(type: QueryType.UPDATE, dataBase: 'test', table: 'user1', data: ['id': '1'], metadata: ['id'])
         def jsonQuery = " {\"type\" : \"update\", \"database\" :\"test\", \"table\":\"user1\", \"data\": {\"id\":\"1\"}}"
 
-        QueryParser queryParser = new QueryParser(new BufferedInputStream(new ByteArrayInputStream(jsonQuery.getBytes())))
+        QueryParser queryParser = new QueryParser(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(jsonQuery.getBytes()))))
         def actualQuery = queryParser.parseQuery()
 
         assertEquals(expectedQuery.table, actualQuery.table)
@@ -59,7 +59,7 @@ class QueryParserTest {
         Query expectedQuery = new Query(type: QueryType.DELETE, dataBase: 'test', table: 'user1')
         def jsonQuery = " {\"type\" : \"delete\", \"database\" :\"test\", \"table\":\"user1\"}"
 
-        QueryParser queryParser = new QueryParser(new BufferedInputStream(new ByteArrayInputStream(jsonQuery.getBytes())))
+        QueryParser queryParser = new QueryParser(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(jsonQuery.getBytes()))))
         def actualQuery = queryParser.parseQuery()
 
         assertEquals(expectedQuery, actualQuery)
@@ -70,7 +70,7 @@ class QueryParserTest {
         Query expectedQuery = new Query(type: QueryType.CREATE_DATABASE, dataBase: 'test')
         def jsonQuery = " {\"type\" : \"create_database\", \"database\" :\"test\"}"
 
-        QueryParser queryParser = new QueryParser(new BufferedInputStream(new ByteArrayInputStream(jsonQuery.getBytes())))
+        QueryParser queryParser = new QueryParser(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(jsonQuery.getBytes()))))
         def actualQuery = queryParser.parseQuery()
 
         assertEquals(expectedQuery, actualQuery)
@@ -82,7 +82,7 @@ class QueryParserTest {
         Query expectedQuery = new Query(type: QueryType.DROP_DATABASE, dataBase: 'test')
         def jsonQuery = " {\"type\" : \"drop_database\", \"database\" :\"test\"}"
 
-        QueryParser queryParser = new QueryParser(new BufferedInputStream(new ByteArrayInputStream(jsonQuery.getBytes())))
+        QueryParser queryParser = new QueryParser(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(jsonQuery.getBytes()))))
         def actualQuery = queryParser.parseQuery()
 
         assertEquals(expectedQuery, actualQuery)
@@ -95,7 +95,7 @@ class QueryParserTest {
         Query expectedQuery = new Query(type: QueryType.CREATE_TABLE, dataBase: 'test', table: 'user1')
         def jsonQuery = " {\"type\" : \"create_table\", \"database\" :\"test\", \"table\":\"user1\"}"
 
-        QueryParser queryParser = new QueryParser(new BufferedInputStream(new ByteArrayInputStream(jsonQuery.getBytes())))
+        QueryParser queryParser = new QueryParser(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(jsonQuery.getBytes()))))
         def actualQuery = queryParser.parseQuery()
 
         assertEquals(expectedQuery, actualQuery)
@@ -106,7 +106,7 @@ class QueryParserTest {
         Query expectedQuery = new Query(type: QueryType.DROP_TABLE, dataBase: 'test', table: 'user1')
         def jsonQuery = " {\"type\" : \"drop_table\", \"database\" :\"test\", \"table\":\"user1\"}"
 
-        QueryParser queryParser = new QueryParser(new BufferedInputStream(new ByteArrayInputStream(jsonQuery.getBytes())))
+        QueryParser queryParser = new QueryParser(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(jsonQuery.getBytes()))))
         def actualQuery = queryParser.parseQuery()
 
         assertEquals(expectedQuery, actualQuery)

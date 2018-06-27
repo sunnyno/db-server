@@ -20,11 +20,11 @@ public class DBService implements Runnable {
     }
 
 
-    public void executeQuery(InputStream inputStream, OutputStream outputStream) throws IOException {
+    public void executeQuery(BufferedReader bufferedReader, OutputStream outputStream) throws IOException {
 
         try (ResultWriter resultWriter = new ResultWriter(outputStream)) {
             try {
-                QueryParser queryParser = new QueryParser(inputStream);
+                QueryParser queryParser = new QueryParser(bufferedReader);
                 Query query = queryParser.parseQuery();
 
                 QuerySemanticsValidator querySemanticsValidator = new QuerySemanticsValidator();
@@ -123,10 +123,12 @@ public class DBService implements Runnable {
     @Override
     public void run() {
         try (BufferedInputStream inputStream = new BufferedInputStream(socket.getInputStream());
+             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
              BufferedOutputStream outputStream = new BufferedOutputStream(socket.getOutputStream())) {
 
             while (!socket.isClosed()) {
-                executeQuery(inputStream, outputStream);
+                executeQuery(bufferedReader, outputStream);
             }
 
         } catch (IOException e) {

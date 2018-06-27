@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 
 public class Server {
     private static final Executor EXECUTOR =
-            Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1);
+            Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     public static final String DB_STORAGE = "src/main/resources/database/";
     public static final String METADATA_XML_SUFFIX = "-metadata.xml";
     public static final String DATA_XML_SUFFIX = "-data.xml";
@@ -19,13 +19,11 @@ public class Server {
     private int port;
 
     public void start() {
-        try {
-            final ServerSocket serverSocket = new ServerSocket(port);
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
             System.out.println("----> Server listening on port " + port);
             while (true) {
 
                 try {
-
                     Socket socket = serverSocket.accept();
                     System.out.println("connected");
                     DBService dbService = new DBService(socket);
@@ -38,7 +36,6 @@ public class Server {
 
 
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }

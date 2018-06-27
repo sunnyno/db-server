@@ -20,10 +20,10 @@ public class QueryParser {
     private static final String METADATA = "metadata";
     private static final String ESCAPE_CHAR = "\\";
 
-    private InputStream bufferedInputStream;
+    private BufferedReader bufferedReader;
 
-    public QueryParser(InputStream bufferedInputStream) {
-        this.bufferedInputStream = bufferedInputStream;
+    public QueryParser(BufferedReader bufferedReader) {
+        this.bufferedReader = bufferedReader;
 
     }
 
@@ -78,12 +78,8 @@ public class QueryParser {
 
     private JSONObject getJsonObject() {
 
-        String line;
-
         try {
-            InputStreamReader in = new InputStreamReader(bufferedInputStream);
-            BufferedReader bufferedReader = new BufferedReader(in);
-
+            String line;
             StringBuilder responseStrBuilder = new StringBuilder();
             while ((line = bufferedReader.readLine()) != null && !line.equals(ESCAPE_CHAR)) {
 

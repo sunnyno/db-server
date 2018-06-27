@@ -14,7 +14,6 @@ import static com.dzytsiuk.dbserver.server.Server.*;
 
 public class QueryExecutor {
 
-    // private Query query;
     private static final StaxQueryHandler STAX_QUERY_HANDLER = new StaxQueryHandler();
 
 

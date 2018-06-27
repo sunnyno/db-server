@@ -25,7 +25,6 @@ public class ResultWriter implements AutoCloseable {
             outputStream.write(newLine.getBytes());
             outputStream.write(ESCAPE_CHAR.getBytes());
             outputStream.write(newLine.getBytes());
-            outputStream.flush();
         } catch (IOException e) {
             throw new QueryExecuteException("Unable to fetch result", e);
         }
@@ -38,7 +37,6 @@ public class ResultWriter implements AutoCloseable {
             outputStream.write(newLine.getBytes());
             outputStream.write(ESCAPE_CHAR.getBytes());
             outputStream.write(newLine.getBytes());
-            outputStream.flush();
 
         } catch (IOException e) {
             throw new QueryExecuteException("Unable to fetch result", e);
@@ -52,7 +50,6 @@ public class ResultWriter implements AutoCloseable {
             outputStream.write(newLine.getBytes());
             outputStream.write(ESCAPE_CHAR.getBytes());
             outputStream.write(newLine.getBytes());
-            outputStream.flush();
 
         } catch (IOException e) {
             throw new QueryExecuteException("Unable to fetch result", e);
@@ -66,7 +63,7 @@ public class ResultWriter implements AutoCloseable {
             outputStream.write(newLine.getBytes());
             outputStream.write(ESCAPE_CHAR.getBytes());
             outputStream.write(newLine.getBytes());
-            outputStream.flush();
+
         } catch (IOException e) {
             throw new QueryExecuteException("Unable to fetch result", e);
         }
