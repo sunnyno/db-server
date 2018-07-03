@@ -1,4 +1,4 @@
-package com.dzytsiuk.dbserver.executor.stax
+package com.dzytsiuk.dbserver.processor.stax
 
 import com.dzytsiuk.dbserver.entity.Query
 import com.dzytsiuk.dbserver.entity.QueryType
@@ -10,7 +10,7 @@ class StaxQueryHandlerTest {
 
     @Test
     void appendFirstDataElementTest() {
-        File table = new File("src/test/resources/db", 'user-data.xml')
+        File table = new File("test-database", 'user-data.xml')
         table.createNewFile();
         Query query = new Query(type: QueryType.INSERT, dataBase: 'test', table: 'user1', data: ['id': '1', 'name': 'test'], metadata: ['id', 'name'])
 
@@ -24,7 +24,7 @@ class StaxQueryHandlerTest {
 
     @Test
     void appendDataTest() {
-        File table = new File("src/test/resources/db", 'user-data.xml')
+        File table = new File("test-database", 'user-data.xml')
         table.createNewFile();
         Query query = new Query(type: QueryType.INSERT, dataBase: 'test', table: 'user1', data: ['id': '1', 'name': 'test'], metadata: ['id', 'name'])
         StaxQueryHandler queryHandler = new StaxQueryHandler()
@@ -39,7 +39,7 @@ class StaxQueryHandlerTest {
 
     @Test
     void appendMetaData() {
-        File table = new File("src/test/resources/db", 'user-metadata.xml')
+        File table = new File("test-database", 'user-metadata.xml')
         table.createNewFile();
         Query query = new Query(type: QueryType.INSERT, dataBase: 'test', table: 'user1', data: ['id': '1', 'name': 'test'], metadata: ['id', 'name'])
         StaxQueryHandler queryHandler = new StaxQueryHandler()

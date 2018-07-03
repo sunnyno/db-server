@@ -1,12 +1,24 @@
 package com.dzytsiuk.dbserver.exception;
 
-public class QueryExecuteException extends RuntimeException {
+import com.dzytsiuk.dbserver.processor.validator.StatusCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    public QueryExecuteException(String message) {
-        super(message);
-    }
+public class QueryExecuteException extends RuntimeException {
+    private static final Logger logger = LoggerFactory.getLogger(QueryParseException.class);
+    String message;
 
     public QueryExecuteException(String message, Throwable cause) {
-        super(message, cause);
+        this.message = message;
+        logger.error(message, cause);
+    }
+
+    public QueryExecuteException(StatusCode invalidMetadata, Exception e) {
+        this(invalidMetadata.getStatus(), e);
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
     }
 }

@@ -2,7 +2,7 @@ package com.dzytsiuk.dbserver.testdata
 
 import com.dzytsiuk.dbserver.service.DBService
 
-class TestExecutor {
+class TestDataProvider {
 
     void setUpOrTearDown(String... queries) {
         queries.each {
@@ -11,8 +11,7 @@ class TestExecutor {
             def socket = [getInputStream: inputStream, getOutputStream: outputStream,
                           close         : { inputStream.close(); outputStream.close() }] as Socket
             DBService dbService = new DBService(socket)
-            dbService.executeQuery(new BufferedReader(new InputStreamReader(socket.getInputStream())), socket.getOutputStream())
-
+            dbService.executeQuery(new BufferedInputStream(socket.getInputStream()), socket.getOutputStream())
         }
     }
 }

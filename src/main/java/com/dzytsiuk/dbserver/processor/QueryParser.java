@@ -1,4 +1,4 @@
-package com.dzytsiuk.dbserver.executor;
+package com.dzytsiuk.dbserver.processor;
 
 import com.dzytsiuk.dbserver.entity.Query;
 import com.dzytsiuk.dbserver.entity.QueryType;
@@ -6,10 +6,10 @@ import com.dzytsiuk.dbserver.exception.QueryParseException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class QueryParser {
 
@@ -18,16 +18,17 @@ public class QueryParser {
     private static final String TABLE = "table";
     private static final String DATA = "data";
     private static final String METADATA = "metadata";
-    private static final String ESCAPE_CHAR = "\\";
+    private static final byte ESCAPE_CHAR = '\\';
+    private static final byte[] SAFE_WORD = "exit".getBytes();
+    private static final int DEFAULT_BUFFER_SIZE = 512;
 
-    private BufferedReader bufferedReader;
+    private BufferedInputStream bufferedInputStream;
 
-    public QueryParser(BufferedReader bufferedReader) {
-        this.bufferedReader = bufferedReader;
-
+    public QueryParser(BufferedInputStream bufferedInputStream) {
+        this.bufferedInputStream = bufferedInputStream;
     }
 
-    public Query parseQuery() {
+    public Query parseQuery() throws InterruptedException {
         JSONObject jsonObject = getJsonObject();
         Query query = new Query();
 
@@ -37,26 +38,20 @@ public class QueryParser {
         if (!jsonObject.isNull(TABLE)) {
             query.setTable(jsonObject.getString(TABLE));
         }
-
         if (!jsonObject.isNull(DATA)) {
             setMapToQuery(query, jsonObject.getJSONObject(DATA));
         }
         if (!jsonObject.isNull(METADATA)) {
             setMetadataToQuery(query, jsonObject.getJSONArray(METADATA));
         }
-
-
         return query;
-
     }
 
     private void setMetadataToQuery(Query query, JSONArray jsonArray) {
-        if (query.getMetadata() == null) {
-            query.setMetadata(new ArrayList<>());
-        }
-        for (Object o : jsonArray) {
-            query.getMetadata().add((String) o);
-        }
+        List<String> metadata = jsonArray.toList().stream()
+                .map(object -> Objects.toString(object, null))
+                .collect(Collectors.toList());
+        query.setMetadata(metadata);
 
     }
 
@@ -76,20 +71,34 @@ public class QueryParser {
         }
     }
 
-    private JSONObject getJsonObject() {
-
+    private JSONObject getJsonObject() throws InterruptedException {
         try {
-            String line;
             StringBuilder responseStrBuilder = new StringBuilder();
-            while ((line = bufferedReader.readLine()) != null && !line.equals(ESCAPE_CHAR)) {
-
-                responseStrBuilder.append(line);
+            byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+            int count;
+            while ((count = bufferedInputStream.read(buffer)) != -1) {
+                if (buffer[count - 2] == ESCAPE_CHAR) {
+                    responseStrBuilder.append(new String(buffer, 0, count - 2));
+                    break;
+                } else {
+                    if (count > SAFE_WORD.length) {
+                        checkSafeWord(buffer, count);
+                    }
+                    responseStrBuilder.append(new String(buffer, 0, count));
+                }
             }
-
             return new JSONObject(responseStrBuilder.toString());
-
         } catch (IOException e) {
             throw new QueryParseException("Error parsing query", e);
         }
     }
+
+    private void checkSafeWord(byte[] buffer, int count) throws InterruptedException {
+        byte[] safeWord = new byte[SAFE_WORD.length];
+        System.arraycopy(buffer, count - SAFE_WORD.length - 1, safeWord, 0, SAFE_WORD.length);
+        if (Arrays.equals(safeWord, SAFE_WORD)) {
+            throw new InterruptedException();
+        }
+    }
+
 }

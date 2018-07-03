@@ -1,18 +1,26 @@
 package com.dzytsiuk.dbserver.service;
 
 import com.dzytsiuk.dbserver.entity.Query;
-import com.dzytsiuk.dbserver.executor.QueryExecutor;
-import com.dzytsiuk.dbserver.executor.QueryParser;
-import com.dzytsiuk.dbserver.executor.validator.QuerySemanticsValidator;
-import com.dzytsiuk.dbserver.executor.ResultWriter;
+import com.dzytsiuk.dbserver.processor.QueryParser;
+import com.dzytsiuk.dbserver.processor.ResultWriter;
+import com.dzytsiuk.dbserver.processor.query.DefaultQuery;
+import com.dzytsiuk.dbserver.processor.query.factory.QueryFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 
 
 public class DBService implements Runnable {
 
     private Socket socket;
+    private static final QueryFactory QUERY_FACTORY = QueryFactory.getInstance();
+    private boolean isSocketClosed = false;
+    private static final Logger logger = LoggerFactory.getLogger(DBService.class);
 
 
     public DBService(Socket socket) {
@@ -20,126 +28,36 @@ public class DBService implements Runnable {
     }
 
 
-    public void executeQuery(BufferedReader bufferedReader, OutputStream outputStream) throws IOException {
+    public void executeQuery(BufferedInputStream inputStream, OutputStream outputStream) throws IOException {
 
         try (ResultWriter resultWriter = new ResultWriter(outputStream)) {
             try {
-                QueryParser queryParser = new QueryParser(bufferedReader);
+                QueryParser queryParser = new QueryParser(inputStream);
                 Query query = queryParser.parseQuery();
-
-                QuerySemanticsValidator querySemanticsValidator = new QuerySemanticsValidator();
-
-                QueryExecutor queryExecutor = new QueryExecutor();
-
-
-                switch (query.getType()) {
-                    case SELECT: {
-                        String validationMessage = querySemanticsValidator.validateSelect(query);
-                        if (validationMessage == null) {
-                            resultWriter.writeResult(queryExecutor.select(query));
-                        } else {
-                            resultWriter.writeResult(validationMessage);
-                        }
-                        break;
-                    }
-                    case INSERT: {
-                        String validationMessage = querySemanticsValidator.validateInsert(query);
-                        if (validationMessage == null) {
-                            resultWriter.writeResult(queryExecutor.insert(query));
-                        } else {
-                            resultWriter.writeResult(validationMessage);
-                        }
-                        break;
-                    }
-                    case DELETE: {
-                        String validationMessage = querySemanticsValidator.validateDelete(query);
-                        if (validationMessage == null) {
-                            resultWriter.writeResult(queryExecutor.delete(query));
-                        } else {
-                            resultWriter.writeResult(validationMessage);
-                        }
-                        break;
-                    }
-                    case UPDATE: {
-                        String validationMessage = querySemanticsValidator.validateUpdate(query);
-                        if (validationMessage == null) {
-                            resultWriter.writeResult(queryExecutor.update(query));
-                        } else {
-                            resultWriter.writeResult(validationMessage);
-                        }
-                        break;
-                    }
-                    case CREATE_TABLE: {
-                        String validationMessage = querySemanticsValidator.validateCreateTable(query);
-                        if (validationMessage == null) {
-                            resultWriter.writeResult(queryExecutor.createTable(query));
-                        } else {
-                            resultWriter.writeResult(validationMessage);
-                        }
-                        break;
-                    }
-                    case DROP_TABLE: {
-                        String validationMessage = querySemanticsValidator.validateDropTable(query);
-                        if (validationMessage == null) {
-                            resultWriter.writeResult(queryExecutor.dropTable(query));
-                        } else {
-                            resultWriter.writeResult(validationMessage);
-                        }
-                        break;
-                    }
-                    case CREATE_DATABASE: {
-                        String validationMessage = querySemanticsValidator.validateCreateDatabase(query);
-                        if (validationMessage == null) {
-                            resultWriter.writeResult(queryExecutor.createDatabase(query));
-                        } else {
-                            resultWriter.writeResult(validationMessage);
-                        }
-
-                        break;
-                    }
-                    case DROP_DATABASE: {
-                        String validationMessage = querySemanticsValidator.validateDropDatabase(query);
-                        if (validationMessage == null) {
-                            resultWriter.writeResult(queryExecutor.dropDatabase(query));
-                        } else {
-                            resultWriter.writeResult(validationMessage);
-                        }
-                        break;
-                    }
-                    case ERROR: {
-                        resultWriter.writeResult("Invalid query type");
-
-                        break;
-                    }
-                }
-
+                DefaultQuery defaultQuery = QUERY_FACTORY.getDefaultQuery(query.getType());
+                defaultQuery.execute(query, resultWriter);
+            } catch (InterruptedException e) {
+                isSocketClosed = true;
+                logger.info("disconnected");
             } catch (Exception e) {
-                resultWriter.writeResult(e.getMessage());
+                if (!isSocketClosed) {
+                    logger.error("Execution error ", e);
+                    resultWriter.writeResult(e.getMessage());
+                }
             }
-
         }
     }
 
     @Override
     public void run() {
-        try (BufferedInputStream inputStream = new BufferedInputStream(socket.getInputStream());
-             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-             BufferedOutputStream outputStream = new BufferedOutputStream(socket.getOutputStream())) {
-
-            while (!socket.isClosed()) {
-                executeQuery(bufferedReader, outputStream);
+        try (Socket mySocket = socket;
+             BufferedOutputStream outputStream = new BufferedOutputStream(socket.getOutputStream());
+             BufferedInputStream inputStream = new BufferedInputStream(socket.getInputStream())) {
+            while (!isSocketClosed) {
+                executeQuery(inputStream, outputStream);
             }
-
         } catch (IOException e) {
-            throw new RuntimeException("Error getting streams", e);
-        } finally {
-            //??
-            try {
-                socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            logger.error("Socket exception", e);
         }
     }
 }

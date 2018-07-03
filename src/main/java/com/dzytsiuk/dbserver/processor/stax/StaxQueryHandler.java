@@ -1,4 +1,4 @@
-package com.dzytsiuk.dbserver.executor.stax;
+package com.dzytsiuk.dbserver.processor.stax;
 
 import com.dzytsiuk.dbserver.entity.Query;
 
@@ -16,23 +16,16 @@ public class StaxQueryHandler {
 
     private static final XMLOutputFactory XML_OUTPUT_FACTORY = XMLOutputFactory.newInstance();
     private static final XMLEventFactory XML_EVENT_FACTORY = XMLEventFactory.newInstance();
+    private static final XMLInputFactory XML_INPUT_FACTORY = XMLInputFactory.newInstance();
 
     public int appendFirstDataElement(File table, Query query) throws Exception {
-
-
         int count = 0;
-
-
         String xmlString = appendDataElement(query, query.getData());
-
         try (FileWriter fileWriter = new FileWriter(table);
              BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
             bufferedWriter.write(xmlString.toCharArray());
             count++;
-
         }
-
-
         return count;
     }
 
@@ -41,10 +34,11 @@ public class StaxQueryHandler {
         Path in = Paths.get(table.getAbsolutePath());
         Path temp = Files.createTempFile(null, null);
         int count = 0;
-        try (FileWriter out = new FileWriter(temp.toFile())) {
+        try (FileWriter out = new FileWriter(temp.toFile());
+             FileReader fileReader = new FileReader(table)) {
 
-            XMLEventReader reader = XMLInputFactory.newInstance().createXMLEventReader(new FileReader(table));
-            XMLEventWriter writer = XMLOutputFactory.newInstance().createXMLEventWriter(out);
+            XMLEventReader reader = XML_INPUT_FACTORY.createXMLEventReader(fileReader);
+            XMLEventWriter writer = XML_OUTPUT_FACTORY.createXMLEventWriter(out);
 
             try {
                 int depth = 0;
@@ -56,10 +50,8 @@ public class StaxQueryHandler {
                     } else if (eventType == XMLStreamConstants.END_ELEMENT) {
                         depth--;
                         if (depth == 0) {
-
                             //add table
                             writer.add(XML_EVENT_FACTORY.createStartElement("", null, query.getTable()));
-
                             //add values
                             for (Map.Entry<String, String> colDataMap : query.getData().entrySet()) {
                                 String column = colDataMap.getKey();
@@ -68,7 +60,6 @@ public class StaxQueryHandler {
                                 writer.add(XML_EVENT_FACTORY.createCharacters(value));
                                 writer.add(XML_EVENT_FACTORY.createEndElement("", null, column));
                             }
-
                             writer.add(XML_EVENT_FACTORY.createEndElement("", null, query.getTable()));
                             count++;
                         }
@@ -80,7 +71,6 @@ public class StaxQueryHandler {
                 writer.close();
                 reader.close();
             }
-
             Files.move(temp, in, StandardCopyOption.REPLACE_EXISTING);
             return count;
         }
@@ -89,21 +79,15 @@ public class StaxQueryHandler {
 
 
     public boolean appendMetaData(File table, Query query) throws XMLStreamException, IOException {
-
         int count = 0;
-
         String xmlString = appendMetaDataElement(query, query.getMetadata());
-
         try (FileWriter fileWriter = new FileWriter(table);
              BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
             bufferedWriter.write(xmlString.toCharArray());
             count++;
 
         }
-
         return count > 0;
-
-
     }
 
     private String appendMetaDataElement(Query query, List<String> metadata) throws XMLStreamException {
@@ -154,11 +138,11 @@ public class StaxQueryHandler {
         Path in = Paths.get(table.getAbsolutePath());
         Path temp = Files.createTempFile(null, null);
         int count = 0;
-        try (FileWriter out = new FileWriter(temp.toFile())) {
+        try (FileWriter out = new FileWriter(temp.toFile());
+             FileReader fileReader = new FileReader(table)) {
 
-            XMLEventReader reader = XMLInputFactory.newInstance().createXMLEventReader(new FileReader(table));
-            XMLEventWriter writer = XMLOutputFactory.newInstance().createXMLEventWriter(out);
-
+            XMLEventReader reader = XML_INPUT_FACTORY.createXMLEventReader(fileReader);
+            XMLEventWriter writer = XML_OUTPUT_FACTORY.createXMLEventWriter(out);
             try {
                 XMLEvent prevEvent = null;
                 while (reader.hasNext()) {
@@ -178,25 +162,25 @@ public class StaxQueryHandler {
                 writer.close();
                 reader.close();
             }
-
             Files.move(temp, in, StandardCopyOption.REPLACE_EXISTING);
         }
         return count;
     }
 
-    public int getCount(File table, String tableName) throws FileNotFoundException, XMLStreamException {
+    public int getCount(File table, String tableName) throws IOException, XMLStreamException {
         int count = 0;
-        XMLEventReader reader = XMLInputFactory.newInstance().createXMLEventReader(new FileReader(table));
-        try {
-
-            while (reader.hasNext()) {
-                XMLEvent event = reader.nextEvent();
-                if (event.getEventType() == XMLStreamConstants.START_ELEMENT && event.toString().contains(tableName)) {
-                    count++;
+        try(FileReader fileReader = new FileReader(table)) {
+            XMLEventReader reader = XML_INPUT_FACTORY.createXMLEventReader(fileReader);
+            try {
+                while (reader.hasNext()) {
+                    XMLEvent event = reader.nextEvent();
+                    if (event.getEventType() == XMLStreamConstants.START_ELEMENT && event.toString().contains(tableName)) {
+                        count++;
+                    }
                 }
+            } finally {
+                reader.close();
             }
-        } finally {
-            reader.close();
         }
         return count;
     }

@@ -1,4 +1,4 @@
-package com.dzytsiuk.dbserver.executor.validator.sax;
+package com.dzytsiuk.dbserver.processor.validator.sax;
 
 
 import org.xml.sax.Attributes;
